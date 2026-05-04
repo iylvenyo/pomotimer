@@ -1,13 +1,18 @@
-import time
-import os
-import sys
+import argparse, time, os, sys, subprocess
 from tomato_art import TOMATO
+
+def resource_path(relative_path):
+    base_path = getattr(sys, "_MEIPASS", os.path.abspath("."))
+    return os.path.join(base_path, relative_path)
 
 RED = "\033[31m"
 RESET = "\033[0m"
 
-def print_tomato():
-    print(RED + TOMATO + RESET)
+def print_tomato(color_on=True):
+    if color_on:
+        print(RED + TOMATO + RESET)
+    else:
+        print(TOMATO)
 
 def parse_time(s):
     s = s.strip().lower()
@@ -26,40 +31,11 @@ def parse_time(s):
     return int(s)
 
 def set_times():
-    while True:
-        try:
-            parts = input("> ").strip().split()
-            if len(parts) != 4:
-                print("Enter exactly 4 values: work break long_break iterations")
-                continue
-
-            work_time = parse_time(parts[0])
-            break_time = parse_time(parts[1])
-            long_break_time = parse_time(parts[2])
-            iterations = int(parts[3])
-
-            if work_time <= 0 or break_time <= 0 or long_break_time <= 0:
-                print("All times must be positive")
-                continue
-            if iterations < 1:
-                print("Iterations must be a positive integer")
-                continue
-
-            return work_time, break_time, long_break_time, iterations
-        except ValueError as e:
-            print(f"Invalid input: {e}")
+    parts = input("times (work break long iterations): ").strip().split()
+    return parse_time(parts[0]), parse_time(parts[1]), parse_time(parts[2]), int(parts[3])
 
 def play_sound():
-    try:
-        if sys.platform == "win32":
-            import winsound
-            winsound.MessageBeep()
-        elif sys.platform == "darwin":
-            os.system('afplay /System/Library/Sounds/Glass.aiff >/dev/null 2>&1 &')
-        else:
-            os.system('printf "\\a"')
-    except Exception:
-        pass
+    return subprocess.Popen(["mpg123", "-q", "--loop", "2", resource_path("tinker-ring.mp3")])
 
 def start_timer(minutes, label):
     total_seconds = minutes * 60
@@ -69,25 +45,50 @@ def start_timer(minutes, label):
         time.sleep(1)
     print(f"\r{label}: 00:00")
 
-def main():
-    print(TOMATO)
-    print("Press Ctrl+C to exit during the countdown.")
-    print(
-        "Enter times for work, break, and long break.\n"
-        "Use minutes, like 25 5 15 4, or mixed formats like 1h45 15m 30 3\n"
+def build_parser():
+    parser = argparse.ArgumentParser(
+        prog="pomotimer",
+        description="A simple CLI based pomodoro timer."
     )
+    parser.add_argument("-w", "--work", default="25", help="work time, e.g. 25 or 1h45")
+    parser.add_argument("-b", "--break-time", default="5", help="short break time, e.g. 5 or 15m")
+    parser.add_argument("-l", "--long-break", default="15", help="long break time, e.g. 15")
+    parser.add_argument("-s", "--sessions", type=int, default=4, help="number of work sessions before the long break")
+    parser.add_argument("--no-color", action="store_true", help="disable colored output")
+    parser.add_argument("--sound", choices=["on", "off"], default="on", help="enable or disable sound")
+    parser.add_argument("-v", "--version", action="version", version="pomotimer 1.0") 
+    return parser
 
-    work_time, break_time, long_break_time, iterations = set_times()
+def main():
+    parser = build_parser()
+    args = parser.parse_args()
+
+    color_on = not args.no_color
+    sound_on = args.sound == "on"
+
+    print_tomato(color_on)
+    print("Ctrl+C to exit")
+    print("pomotimer -h for help")
+
+    work_time = parse_time(args.work)
+    break_time = parse_time(args.break_time)
+    long_break_time = parse_time(args.long_break)
+    sessions = args.sessions
 
     while True:
-        for i in range(iterations):
-            play_sound()
+        for i in range(sessions):
             start_timer(work_time, "Work")
-            if i < iterations - 1:
+            if sound_on:
                 play_sound()
+
+            if i < sessions - 1:
                 start_timer(break_time, "Break")
-        play_sound()
+                if sound_on:
+                    play_sound()
+
         start_timer(long_break_time, "Long break")
+        if sound_on:
+            play_sound()
 
 if __name__ == "__main__":
     main()
