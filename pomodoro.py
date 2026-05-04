@@ -89,6 +89,4 @@ def main():
         start_timer(long_break_time, "Long break")
         if sound_on:
             play_sound()
-
-if __name__ == "__main__":
     main()
