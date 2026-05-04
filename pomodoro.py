@@ -1,6 +1,13 @@
 import time
 import os
 import sys
+from tomato_art import TOMATO
+
+RED = "\033[31m"
+RESET = "\033[0m"
+
+def print_tomato():
+    print(RED + TOMATO + RESET)
 
 def parse_time(s):
     s = s.strip().lower()
@@ -63,6 +70,7 @@ def start_timer(minutes, label):
     print(f"\r{label}: 00:00")
 
 def main():
+    print(TOMATO)
     print("Press Ctrl+C to exit during the countdown.")
     print(
         "Enter times for work, break, and long break.\n"
