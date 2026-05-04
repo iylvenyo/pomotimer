@@ -54,3 +54,4 @@ pomotimer --help
 - The tomato art is shown at startup.
 - The alarm uses `tinker-ring.mp3` when sound is enabled.
 - The timer runs until you stop it with `Ctrl+C`.
+- Presentation/PDF Included for program breakdown
