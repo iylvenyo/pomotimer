@@ -30,10 +30,6 @@ def parse_time(s):
 
     return float(s)
 
-def set_times():
-    parts = input("times (work break long iterations): ").strip().split()
-    return parse_time(parts[0]), parse_time(parts[1]), parse_time(parts[2]), int(parts[3])
-
 def play_sound():
     return subprocess.Popen(
         ["mpg123", "-q", resource_path("tinker-ring.mp3")],
