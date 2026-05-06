@@ -63,13 +63,13 @@ def build_parser():
         prog="pomotimer",
         description="A simple CLI based pomodoro timer."
     )
-    parser.add_argument("-w", "--work", default="25", help="work time, e.g. 25 or 1h45")
-    parser.add_argument("-b", "--break-time", default="5", help="short break time, e.g. 5 or 15m")
+    parser.add_argument("-w", "--work", default="25", help="work time, e.g. 0.5 or 25 or 1h45")
+    parser.add_argument("-b", "--break-time", default="5", help="short break time, e.g. 0.15 or 15m")
     parser.add_argument("-l", "--long-break", default="15", help="long break time, e.g. 15")
     parser.add_argument("-s", "--sessions", type=int, default=4, help="number of work sessions before the long break")
     parser.add_argument("--no-color", action="store_true", help="disable colored output")
     parser.add_argument("--sound", choices=["on", "off"], default="on", help="enable or disable sound")
-    parser.add_argument("-v", "--version", action="version", version="pomotimer 1.0") 
+    parser.add_argument("-v", "--version", action="version", version="pomotimer 1.0.0") 
     return parser
 
 def main():
