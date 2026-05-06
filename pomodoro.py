@@ -19,31 +19,44 @@ def parse_time(s):
     if not s:
         raise ValueError("Empty time value")
 
-    if 'h' in s:
-        hours_part, rest = s.split('h', 1)
-        hours = int(hours_part) if hours_part else 0
-        minutes = int(rest) if rest else 0
-        return hours * 60 + minutes
+    if "h" in s:
+        h, m = s.split("h", 1)
+        hours = int(h) if h else 0
+        minutes = int(m) if m else 0
+        return float(hours * 60 + minutes)
 
-    if s.endswith('m'):
-        return int(s[:-1])
+    if s.endswith("m"):
+        return float(s[:-1])
 
-    return int(s)
+    return float(s)
 
 def set_times():
     parts = input("times (work break long iterations): ").strip().split()
     return parse_time(parts[0]), parse_time(parts[1]), parse_time(parts[2]), int(parts[3])
 
 def play_sound():
-    return subprocess.Popen(["mpg123", "-q", "--loop", "2", resource_path("tinker-ring.mp3")])
+    return subprocess.Popen(
+        ["mpg123", "-q", resource_path("tinker-ring.mp3")],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        stdin=subprocess.DEVNULL,
+    )
 
-def start_timer(minutes, label):
-    total_seconds = minutes * 60
+def start_timer(minutes, label, sound_on):
+    total_seconds = int(minutes * 60)
+    width = 20
     for remaining in range(total_seconds, 0, -1):
+        elapsed = total_seconds - remaining
+        filled = int(width * elapsed / total_seconds)
+        bar = "-" * filled + " " * (width - filled)
         mins, secs = divmod(remaining, 60)
-        print(f"\r{label}: {mins:02d}:{secs:02d}", end="", flush=True)
+        print(f"\r[{bar}] {label}: {mins:02d}:{secs:02d}", end="", flush=True)
         time.sleep(1)
-    print(f"\r{label}: 00:00")
+    bar = "-" * width
+    print(f"\r[{bar}] {label}: 00:00", end="", flush=True)
+    if sound_on:
+        play_sound()
+    input()
 
 def build_parser():
     parser = argparse.ArgumentParser(
@@ -62,7 +75,6 @@ def build_parser():
 def main():
     parser = build_parser()
     args = parser.parse_args()
-
     color_on = not args.no_color
     sound_on = args.sound == "on"
 
@@ -75,18 +87,13 @@ def main():
     long_break_time = parse_time(args.long_break)
     sessions = args.sessions
 
-    while True:
-        for i in range(sessions):
-            start_timer(work_time, "Work")
-            if sound_on:
-                play_sound()
+    for i in range(sessions):
+        start_timer(work_time, "Work", sound_on)
 
-            if i < sessions - 1:
-                start_timer(break_time, "Break")
-                if sound_on:
-                    play_sound()
+        if i < sessions - 1:
+            start_timer(break_time, "Short break", sound_on)
 
-        start_timer(long_break_time, "Long break")
-        if sound_on:
-            play_sound()
+    start_timer(long_break_time, "Long break", sound_on)
+    print("Pomodoro cycle finished.")
+
 main()
