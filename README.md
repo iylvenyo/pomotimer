@@ -1,6 +1,6 @@
 # pomotimer
 
-A minimal CLI based pomodoro timer for time management.
+A CLI based pomodoro timer for time management.
 
 ## Install
 
@@ -10,11 +10,6 @@ Download the release binary for your platform and drop it into a folder that is 
 Common locations:
 - `~/.local/bin`
 - `/usr/local/bin`
-
-### Windows
-Common locations:
-- `C:\Users\<you>\bin`
-- `C:\Program Files\pomotimer`
 
 If the folder is not already on your `PATH`, add it first, then restart your terminal.
 
